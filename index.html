@@ -1,0 +1,86 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>index</title>
+	<script src="jquery-3.2.1.min.js"></script>
+	<link rel="stylesheet" href="style.css" type="text/css" media="all" />
+</head>
+<body>
+	<div id="radar">
+			<div id="rad"></div>
+			<!--	<div class="obj" data-x="262.5" data-y="661"></div>-->
+	</div>
+</body>
+
+<script>
+	$(function() {
+		const left_long = 2;
+		const right_long = 8;
+		const top_lat = 54;
+		const bottom_lat = 50;
+		var $rad = $('#rad'),
+				$obj = $('.obj'),
+				deg = 0,
+				rad = $rad.width() / 2;
+		const width = $rad.width();
+
+		function calc(x, y) {
+					var getAtan = Math.atan2(x, y);
+					return (-getAtan/(Math.PI/180) + 180) | 0;
+		}
+
+		const getXY = function(lat, long) {
+			div_y = width / top_lat;
+			div_x = width / right_long;
+			x = (div_x * long);
+			y = (div_y * lat);
+			//y = ((top_lat - bottom_lat) / width) * lat;
+			//x = ((right_long - left_long) / width) * long;
+
+			getDeg = calc(x - rad, y - rad);
+			var tmp = $('<div class="obj"></div>');
+			tmp.attr('data-x', x);
+			tmp.attr('data-y', y);
+			tmp.css({left:x, top:y}).attr('data-atDeg', getDeg);
+			$('#radar').append(tmp);
+		};
+
+
+		getXY(51, 3);
+		$obj.each(function(){
+			var pos = $(this).data();
+					//var getAtan = Math.atan2(pos.x-rad, pos.y-rad),
+					//getDeg = (-getAtan/(Math.PI/180) + 180) | 0;
+			getDeg = calc(pos.x-rad, pos.y-rad);
+			// Read/set positions and store degree
+			$(this).css({left:pos.x, top:pos.y}).attr('data-atDeg', getDeg);
+		});
+
+		var source = new EventSource("http://127.0.0.1:5000/stream/");
+		source.onmessage = function(msg) { 
+			const data = JSON.parse(msg.data);
+			for (i = 0; i < data.length; i++) {
+				var x = data[i];
+				console.log(x);
+				getXY(x.lat, x.lng);
+			}
+		};
+    source.onerror = function(eventdata) {
+			this.close();
+			console.log('ERROR');
+		};
+
+		(function rotate() {
+			$rad.css({transform: 'rotate('+ deg +'deg)'}); // Radar rotation
+			$('[data-atDeg='+deg+']').stop().fadeTo(0,1).fadeTo(1700,0.2); // Animate dot at deg
+
+			deg = ++deg % 360;      // Increment and reset to 0 at 360
+			setTimeout(rotate, 25); // LOOP
+		})();
+
+
+
+
+	});
+</script>
+</html>

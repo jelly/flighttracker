@@ -1,0 +1,26 @@
+#radar{
+  position:relative;
+  overflow:hidden;
+  width:700px; height:700px;
+  background:#222 url(./radar.svg);
+  border-radius: 50%;
+  background-size: cover;
+}
+
+#rad{
+  position:absolute;
+  width:700px;
+  height:700px;
+	background:url(./radar_moving.svg);
+  background-size: cover;
+
+}
+
+.obj{
+  background:#cf5;
+  position:absolute;
+  border-radius: 50%;
+  width:4px; height:4px; margin:-2px;
+  box-shadow:0 0 10px 5px rgba(100,255,0,0.5);
+  opacity:0.2;
+}
